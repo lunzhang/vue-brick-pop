@@ -10,6 +10,7 @@
 <script>
 // white red blue yellow green purple grey
 const colors = ['#ffffff', '#FFCDD2', '#C5CAE9', '#FFF9C4', '#C8E6C9', '#D1C4E9', '#F5F5F5'];
+let poppedBrick = 0;
 
 export default {
   name: 'app',
@@ -17,12 +18,7 @@ export default {
     return {
       board: [[], [], [], [], [], [], [], [], [], []],
       currentColors: [1, 2, 3],
-      poppedRange: {
-        minVert: 0,
-        maxVert: 0,
-        minHorz: 0,
-        maxHorz: 0,
-      },
+      poppedRange: {},
     };
   },
   created() {
@@ -44,36 +40,51 @@ export default {
     pop(rowNum, colNum) {
       if (this.board[rowNum][colNum].type !== 0) {
         const initType = this.board[rowNum][colNum].type;
-        this.poppedRange.minVert = rowNum;
-        this.poppedRange.maxVert = rowNum;
-        this.poppedRange.minHorz = colNum;
-        this.poppedRange.maxHorz = colNum;
+        poppedBrick = 0;
+        this.poppedRange = {};
+        this.poppedRange[colNum] = rowNum;
         this.traversePop(rowNum, colNum, initType);
-        this.tidyBoard();
+        this.dropBricks();
       }
     },
     traversePop(rowNum, colNum, initType) {
       // replace popped brick with 0
-      this.board[rowNum].splice(colNum, 1, 0);
+      this.board[rowNum].splice(colNum, 1, { type: 0 });
 
-      // get top, bottom, right, left, bricks
-      const top = this.board[rowNum + 1] ? this.board[rowNum + 1][colNum].type : null;
-      const bottom = this.board[rowNum - 1] ? this.board[rowNum - 1][colNum].type : null;
+      // increment popped brick count
+      poppedBrick += 1;
+
+      // recursive pop same color bricks from top, bottom, right, left
+      const top = this.board[rowNum - 1] ? this.board[rowNum - 1][colNum].type : null;
+      if (top === initType) this.traversePop(rowNum - 1, colNum, initType);
+
+      const bottom = this.board[rowNum + 1] ? this.board[rowNum + 1][colNum].type : null;
+      if (bottom === initType) this.traversePop(rowNum + 1, colNum, initType);
+
       const right = this.board[rowNum][colNum + 1] ? this.board[rowNum][colNum + 1].type : null;
-      const left = this.board[rowNum][colNum - 1] ? this.board[rowNum][colNum - 1].type : null;
-
-      // recursive pop same color bricks
-      if (top === initType) this.traversePop(rowNum + 1, colNum, initType);
-      if (bottom === initType) this.traversePop(rowNum - 1, colNum, initType);
       if (right === initType) this.traversePop(rowNum, colNum + 1, initType);
+
+      const left = this.board[rowNum][colNum - 1] ? this.board[rowNum][colNum - 1].type : null;
       if (left === initType) this.traversePop(rowNum, colNum - 1, initType);
 
-      if (rowNum > this.poppedRange.maxVert) this.poppedRange.maxVert = rowNum;
-      if (rowNum < this.poppedRange.minVert) this.poppedRange.minVert = rowNum;
-      if (colNum > this.poppedRange.maxHorz) this.poppedRange.maxHorz = colNum;
-      if (colNum < this.poppedRange.minHorz) this.poppedRange.minHorz = colNum;
+      // new row
+      if (this.poppedRange[colNum] === undefined) {
+        this.poppedRange[colNum] = rowNum;
+      } else if (this.poppedRange[colNum] !== undefined && this.poppedRange[colNum] < rowNum) {
+        this.poppedRange[colNum] = rowNum;
+      }
     },
-    tidyBoard() {
+    dropBricks() {
+      Object.keys(this.poppedRange).forEach((colNum) => {
+        for (let rowNum = this.poppedRange[colNum] - 1; rowNum >= 0; rowNum--) {
+          if (this.board[rowNum][colNum].type !== 0 && this.board[rowNum + 1] !== undefined
+            && this.board[rowNum + 1][colNum].type === 0) {
+            this.board[rowNum + 1][colNum] = this.board[rowNum][colNum];
+            this.board[rowNum][colNum] = { type: 0 };
+            this.dropBricks();
+          }
+        }
+      });
     },
   },
 };
