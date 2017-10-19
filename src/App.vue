@@ -10,13 +10,14 @@
 <script>
 // white red blue yellow green purple grey
 const colors = ['#ffffff', '#FFCDD2', '#C5CAE9', '#FFF9C4', '#C8E6C9', '#D1C4E9', '#F5F5F5'];
-let poppedBrick = 0;
+let poppedBricks = 0;
 
 export default {
   name: 'app',
   data() {
     return {
       board: [[], [], [], [], [], [], [], [], [], []],
+      score: 0,
       currentColors: [1, 2, 3],
       poppedRange: {},
     };
@@ -40,19 +41,22 @@ export default {
     pop(rowNum, colNum) {
       if (this.board[rowNum][colNum].type !== 0) {
         const initType = this.board[rowNum][colNum].type;
-        poppedBrick = 0;
+        poppedBricks = 0;
         this.poppedRange = {};
         this.poppedRange[colNum] = rowNum;
         this.traversePop(rowNum, colNum, initType);
         this.dropBricks();
+        this.slideBricks();
+        this.score += poppedBricks;
       }
     },
+    // recursively pops bricks of the same type
     traversePop(rowNum, colNum, initType) {
       // replace popped brick with 0
       this.board[rowNum].splice(colNum, 1, { type: 0 });
 
       // increment popped brick count
-      poppedBrick += 1;
+      poppedBricks += 1;
 
       // recursive pop same color bricks from top, bottom, right, left
       const top = this.board[rowNum - 1] ? this.board[rowNum - 1][colNum].type : null;
@@ -74,6 +78,7 @@ export default {
         this.poppedRange[colNum] = rowNum;
       }
     },
+    // recursively moves bricks down if space is empty
     dropBricks() {
       Object.keys(this.poppedRange).forEach((colNum) => {
         for (let rowNum = this.poppedRange[colNum] - 1; rowNum >= 0; rowNum--) {
@@ -85,6 +90,9 @@ export default {
           }
         }
       });
+    },
+    // recursively slide bricks left if empty
+    slideBricks() {
     },
   },
 };
