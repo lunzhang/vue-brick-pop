@@ -10,6 +10,7 @@
 <script>
 // white red blue yellow green purple grey
 const colors = ['#ffffff', '#FFCDD2', '#C5CAE9', '#FFF9C4', '#C8E6C9', '#D1C4E9', '#F5F5F5'];
+const blankBrick = { type: 0, color: colors[0] };
 let poppedBricks = 0;
 
 export default {
@@ -52,8 +53,8 @@ export default {
     },
     // recursively pops bricks of the same type
     traversePop(rowNum, colNum, initType) {
-      // replace popped brick with 0
-      this.board[rowNum].splice(colNum, 1, { type: 0 });
+      // replace popped brick with blank brick
+      this.board[rowNum].splice(colNum, 1, Object.assign({}, blankBrick));
 
       // increment popped brick count
       poppedBricks += 1;
@@ -81,18 +82,41 @@ export default {
     // recursively moves bricks down if space is empty
     dropBricks() {
       Object.keys(this.poppedRange).forEach((colNum) => {
+        // loop through columns of popped bricks
         for (let rowNum = this.poppedRange[colNum] - 1; rowNum >= 0; rowNum--) {
+          // if it's not blank brick and below is blank brick
           if (this.board[rowNum][colNum].type !== 0 && this.board[rowNum + 1] !== undefined
             && this.board[rowNum + 1][colNum].type === 0) {
-            this.board[rowNum + 1][colNum] = this.board[rowNum][colNum];
-            this.board[rowNum][colNum] = { type: 0 };
+            // move brick down one column
+            this.board[rowNum + 1].splice(colNum, 1, this.board[rowNum][colNum]);
+            this.board[rowNum].splice(colNum, 1, Object.assign({}, blankBrick));
             this.dropBricks();
           }
         }
       });
     },
-    // recursively slide bricks left if empty
+    // recursively slide bricks left if column is empty
     slideBricks() {
+      Object.keys(this.poppedRange).reverse().forEach((key) => {
+        const colNum = parseInt(key, 10);
+
+        // last brick in column is empty means column is empty
+        if (this.board[9][colNum].type === 0) {
+          // from empty column to last column
+          for (let i = colNum; i < this.board[9].length - 1; i++) {
+            const col = [];
+            // get the column
+            for (let j = 0; j < this.board.length; j++) {
+              col.push(this.board[j][i + 1]);
+            }
+            // copy next column to current column
+            for (let k = 0; k < this.board.length; k++) {
+              this.board[k].splice(i, 1, col[k]);
+              this.board[k].splice(i + 1, 1, Object.assign({}, blankBrick));
+            }
+          }
+        }
+      });
     },
   },
 };
