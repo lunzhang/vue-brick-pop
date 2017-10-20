@@ -1,8 +1,14 @@
 <template>
   <div id="app">
-    <div v-for="(row, rowNum) in board">
-      <div v-for="(brick, colNum) in row" v-on:click="pop(rowNum, colNum)"
-      class="brick" v-bind:style="{ backgroundColor: brick.color}"/>
+    <div id="board">
+      <div v-for="(row, rowNum) in board">
+          <div v-for="(brick, colNum) in row" v-on:click="pop(rowNum, colNum)" class="brick"
+          v-bind:style="{ backgroundColor: brick.color}">
+          </div>
+      </div>
+    </div>
+    <div id="options">
+      Score: <span>{{ score }}</span>
     </div>
   </div>
 </template>
@@ -134,9 +140,10 @@
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-align: center;
     color: #2c3e50;
     margin-top: 60px;
+    display: flex;
+    justify-content: center;
   }
 
   #app .brick {
@@ -145,5 +152,14 @@
     display: inline-block;
     margin: 1px;
     border-radius: 5px;
+  }
+
+  #board {
+    display: inline-block;
+  }
+
+  #options {
+    display: inline-block;
+    padding: 20px;
   }
 </style>
