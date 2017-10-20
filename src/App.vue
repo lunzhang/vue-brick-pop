@@ -23,7 +23,7 @@
 
 <script>
   // white red blue yellow green purple grey
-  const colors = ['#ffffff', '#FFCDD2', '#C5CAE9', '#FFF9C4', '#C8E6C9', '#D1C4E9', '#F5F5F5'];
+  const colors = ['#ffffff', '#FFCDD2', '#C5CAE9', '#FFF9C4', '#C8E6C9', '#D1C4E9'];
   const blankBrick = { type: 0, color: colors[0] };
   const localStorageKey = 'vbp-high-score';
   let poppedBricks = 0;
