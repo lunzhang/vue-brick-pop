@@ -9,6 +9,9 @@
     </div>
     <div id="options">
       <div>
+        High Score: <span>{{ highScore }}</span>
+      </div>
+      <div id="score">
         Score: <span>{{ score }}</span>
       </div>
       <div id="reset-btn" v-on:click="onReset">
@@ -22,6 +25,7 @@
   // white red blue yellow green purple grey
   const colors = ['#ffffff', '#FFCDD2', '#C5CAE9', '#FFF9C4', '#C8E6C9', '#D1C4E9', '#F5F5F5'];
   const blankBrick = { type: 0, color: colors[0] };
+  const localStorageKey = 'vbp-high-score';
   let poppedBricks = 0;
 
   export default {
@@ -31,6 +35,7 @@
         board: [[], [], [], [], [], [], [], [], [], []],
         currentColors: [1, 2, 3],
         poppedRange: {},
+        highScore: localStorage.getItem(localStorageKey) || 0,
         score: 0,
       };
     },
@@ -67,6 +72,11 @@
           this.dropBricks();
           this.slideBricks();
           this.score += (poppedBricks * poppedBricks);
+          // new high score
+          if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem(localStorageKey, this.highScore);
+          }
           this.checkStatus();
         }
       },
@@ -211,8 +221,13 @@
   }
 
   #options {
+    text-align: center;
     display: inline-block;
     padding: 20px;
+  }
+
+  #score {
+    padding: 10px;
   }
 
   #reset-btn {
@@ -221,6 +236,5 @@
     border-radius: 5px;
     color: white;
     cursor: pointer;
-    margin-top: 10px;
   }
 </style>
