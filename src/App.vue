@@ -143,7 +143,7 @@
       },
       checkStatus() {
         // winning condition - brick on last row first column is empty
-        if (this.board[9][0] === 0) {
+        if (this.board[9][0].type === 0) {
           // add new color if possible
           if (this.currentColors.length < colors.length - 1) {
             this.currentColors.push(this.currentColors.length + 1);
@@ -152,7 +152,36 @@
           return true;
         }
 
+        // reset game on loss
+        if (this.checkLoss(9, 0)) {
+          this.onReset();
+        }
+
         return false;
+      },
+      checkLoss(rowNum, colNum) {
+        const brickType = this.board[rowNum][colNum].type;
+        // base statement - empty brick
+        if (brickType === 0) {
+          return true;
+        }
+
+        const top = this.board[rowNum - 1] ? this.board[rowNum - 1][colNum].type : null;
+        const right = this.board[rowNum][colNum + 1] ? this.board[rowNum][colNum + 1].type : null;
+        let topCheck = true;
+        let rightCheck = true;
+
+        if (top === brickType || right === brickType) {
+          return false;
+        }
+
+        if (top !== null) topCheck = this.checkLoss(rowNum - 1, colNum);
+        if (topCheck === false) return topCheck;
+
+        if (right !== null) rightCheck = this.checkLoss(rowNum, colNum + 1);
+        if (rightCheck === false) return rightCheck;
+
+        return true;
       },
     },
   };
