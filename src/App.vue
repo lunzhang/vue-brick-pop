@@ -66,7 +66,7 @@
           this.traversePop(rowNum, colNum, brickType);
           this.dropBricks();
           this.slideBricks();
-          this.score += poppedBricks;
+          this.score += (poppedBricks * poppedBricks);
           this.checkStatus();
         }
       },
