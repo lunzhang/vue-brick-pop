@@ -44,6 +44,7 @@
     },
     methods: {
       initBoard() {
+        // initialize 10 x 10 board with bricks -> {type: int, color: string}
         for (let i = 0; i < 10; i++) {
           for (let j = 0; j < 10; j++) {
             const color = Math.floor(Math.random() * this.currentColors.length);
@@ -53,7 +54,6 @@
             });
           }
         }
-        console.log(this.board);
       },
       pop(rowNum, colNum) {
         const top = this.board[rowNum - 1] ? this.board[rowNum - 1][colNum].type : null;
@@ -65,22 +65,30 @@
         // only allow pop if brick isn't popped and theres a matching brick near selected brick
         if (brickType !== 0 && (brickType === top || brickType === bottom
           || brickType === right || brickType === left)) {
+          // reset params for computation
           poppedBricks = 0;
           this.poppedRange = {};
           this.poppedRange[colNum] = rowNum;
+
           this.traversePop(rowNum, colNum, brickType);
           this.dropBricks();
           this.slideBricks();
+
           this.score += (poppedBricks * poppedBricks);
+
           // new high score
           if (this.score > this.highScore) {
             this.highScore = this.score;
             localStorage.setItem(localStorageKey, this.highScore);
           }
+
           this.checkStatus();
         }
       },
-      // recursively pops bricks of the same type
+      /*
+      * Recursively pop same type bricks from top, bottom, right, left
+      * Only recursively call when surronding brick exist & brick is same type as popped brick
+      */
       traversePop(rowNum, colNum, initType) {
         // replace popped brick with blank brick
         this.board[rowNum].splice(colNum, 1, Object.assign({}, blankBrick));
@@ -88,7 +96,6 @@
         // increment popped brick count
         poppedBricks += 1;
 
-        // recursive pop same color bricks from top, bottom, right, left
         const top = this.board[rowNum - 1] ? this.board[rowNum - 1][colNum].type : null;
         if (top === initType) this.traversePop(rowNum - 1, colNum, initType);
 
@@ -101,17 +108,23 @@
         const left = this.board[rowNum][colNum - 1] ? this.board[rowNum][colNum - 1].type : null;
         if (left === initType) this.traversePop(rowNum, colNum - 1, initType);
 
-        // new row
+        // new column was popped
         if (this.poppedRange[colNum] === undefined) {
           this.poppedRange[colNum] = rowNum;
         } else if (this.poppedRange[colNum] !== undefined && this.poppedRange[colNum] < rowNum) {
+          // replaces current range if the popped row was below
           this.poppedRange[colNum] = rowNum;
         }
       },
-      // recursively moves bricks down if space is empty
+      // recursively moves bricks down if space below is empty
       dropBricks() {
+        /*
+        * To avoid whole board loop
+        * Loop only through the column of popped range
+        * Loop only through the rows above the last row of the columns in the popped range
+        */
         Object.keys(this.poppedRange).forEach((colNum) => {
-          // loop through columns of popped bricks
+          // loop through bricks in range above popped row
           for (let rowNum = this.poppedRange[colNum] - 1; rowNum >= 0; rowNum--) {
             // if it's not blank brick and below is blank brick
             if (this.board[rowNum][colNum].type !== 0 && this.board[rowNum + 1] !== undefined
@@ -126,19 +139,23 @@
       },
       // recursively slide bricks left if column is empty
       slideBricks() {
+        /*
+        * Start loop at the right most column popped range
+        * If column is empty, shift all bricks on the right of the column, 1 space to the left
+        */
         Object.keys(this.poppedRange).reverse().forEach((key) => {
           const colNum = parseInt(key, 10);
 
-          // last brick in column is empty means column is empty
+          // last brick in column is empty so column is empty
           if (this.board[9][colNum].type === 0) {
-            // from empty column to last column
+            // from the empty column to all the columns to the right
             for (let i = colNum; i < this.board[9].length - 1; i++) {
               const col = [];
               // get the column
               for (let j = 0; j < this.board.length; j++) {
                 col.push(this.board[j][i + 1]);
               }
-              // copy next column to current column
+              // shift column 1 space to the left
               for (let k = 0; k < this.board.length; k++) {
                 this.board[k].splice(i, 1, col[k]);
                 this.board[k].splice(i + 1, 1, Object.assign({}, blankBrick));
@@ -151,6 +168,7 @@
         this.initBoard();
         this.score = 0;
       },
+      // checks win / lose conditions
       checkStatus() {
         // winning condition - brick on last row first column is empty
         if (this.board[9][0].type === 0) {
@@ -169,6 +187,12 @@
 
         return false;
       },
+      /*
+      * Recursively checks if game is lost  -> when no bricks have neighbors of same type
+      * Start the algorithm at the bottom left of the board
+      * Check if top or right brick is of same type
+      * Repeat call on top and right brick
+      */
       checkLoss(rowNum, colNum) {
         const brickType = this.board[rowNum][colNum].type;
         // base statement - empty brick
@@ -181,10 +205,15 @@
         let topCheck = true;
         let rightCheck = true;
 
+        // if top or right brick is same type -> game isn't lost
         if (top === brickType || right === brickType) {
           return false;
         }
 
+        /*
+        * Recursively check top and right brick
+        * if game is found to be still playable, return to prevent any further calls
+        */
         if (top !== null) topCheck = this.checkLoss(rowNum - 1, colNum);
         if (topCheck === false) return topCheck;
 
