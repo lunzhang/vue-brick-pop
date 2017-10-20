@@ -40,12 +40,19 @@
         console.log(this.board);
       },
       pop(rowNum, colNum) {
-        if (this.board[rowNum][colNum].type !== 0) {
-          const initType = this.board[rowNum][colNum].type;
+        const top = this.board[rowNum - 1] ? this.board[rowNum - 1][colNum].type : null;
+        const bottom = this.board[rowNum + 1] ? this.board[rowNum + 1][colNum].type : null;
+        const right = this.board[rowNum][colNum + 1] ? this.board[rowNum][colNum + 1].type : null;
+        const left = this.board[rowNum][colNum - 1] ? this.board[rowNum][colNum - 1].type : null;
+        const brickType = this.board[rowNum][colNum].type;
+
+        // only allow pop if brick isn't popped and theres a matching brick near selected brick
+        if (brickType !== 0 && (brickType === top || brickType === bottom
+          || brickType === right || brickType === left)) {
           poppedBricks = 0;
           this.poppedRange = {};
           this.poppedRange[colNum] = rowNum;
-          this.traversePop(rowNum, colNum, initType);
+          this.traversePop(rowNum, colNum, brickType);
           this.dropBricks();
           this.slideBricks();
           this.score += poppedBricks;
