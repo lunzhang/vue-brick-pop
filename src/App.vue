@@ -67,6 +67,7 @@
           this.dropBricks();
           this.slideBricks();
           this.score += poppedBricks;
+          this.checkStatus();
         }
       },
       // recursively pops bricks of the same type
@@ -139,6 +140,19 @@
       onReset() {
         this.initBoard();
         this.score = 0;
+      },
+      checkStatus() {
+        // winning condition - brick on last row first column is empty
+        if (this.board[9][0] === 0) {
+          // add new color if possible
+          if (this.currentColors.length < colors.length - 1) {
+            this.currentColors.push(this.currentColors.length + 1);
+          }
+          this.initBoard();
+          return true;
+        }
+
+        return false;
       },
     },
   };
