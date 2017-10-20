@@ -8,7 +8,12 @@
       </div>
     </div>
     <div id="options">
-      Score: <span>{{ score }}</span>
+      <div>
+        Score: <span>{{ score }}</span>
+      </div>
+      <div id="reset-btn" v-on:click="onReset">
+        Reset
+      </div>
     </div>
   </div>
 </template>
@@ -24,9 +29,9 @@
     data() {
       return {
         board: [[], [], [], [], [], [], [], [], [], []],
-        score: 0,
         currentColors: [1, 2, 3],
         poppedRange: {},
+        score: 0,
       };
     },
     created() {
@@ -37,10 +42,10 @@
         for (let i = 0; i < 10; i++) {
           for (let j = 0; j < 10; j++) {
             const color = Math.floor(Math.random() * this.currentColors.length);
-            this.board[i][j] = {
+            this.board[i].splice(j, 1, {
               type: this.currentColors[color],
               color: colors[this.currentColors[color]],
-            };
+            });
           }
         }
         console.log(this.board);
@@ -131,6 +136,10 @@
           }
         });
       },
+      onReset() {
+        this.initBoard();
+        this.score = 0;
+      },
     },
   };
 </script>
@@ -161,5 +170,14 @@
   #options {
     display: inline-block;
     padding: 20px;
+  }
+
+  #reset-btn {
+    padding: 10px 20px;
+    background-color: #81C784;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
   }
 </style>
