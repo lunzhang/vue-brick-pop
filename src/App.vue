@@ -35,7 +35,7 @@
         board: [[], [], [], [], [], [], [], [], [], []],
         currentColors: [1, 2, 3],
         poppedRange: {},
-        highScore: localStorage.getItem(localStorageKey) || 0,
+        highScore: window.localStorage.getItem(localStorageKey) || 0,
         score: 0,
       };
     },
@@ -183,6 +183,7 @@
         // reset game on loss
         if (this.checkLoss(9, 0)) {
           this.onReset();
+          return true;
         }
 
         return false;
